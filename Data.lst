@@ -1,0 +1,151 @@
+C51 COMPILER V9.01   DATA                                                                  01/04/2021 22:20:20 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DATA
+OBJECT MODULE PLACED IN Data.obj
+COMPILER INVOKED BY: D:\App_program\Keil4\keil4\install_location\C51\BIN\C51.EXE HardWare\Data.c BROWSE INCDIR(.\HardWar
+                    -e;..\LM016L显示时钟和日期) DEBUG OBJECTEXTEND PRINT(.\Data.lst) OBJECT(Data.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          #include "Data.h"
+   4          #include "LM016L.h"
+   5          
+   6          #include "Timer.h"
+   7          #include "temp.h"
+   8          
+   9          //typedef unsigned int u16;       //对数据类型进行声明定义
+  10          //typedef unsigned char u8;
+  11          
+  12          char d_qian1,d_bai1,d_shi1,d_ge1,d_shi2,d_ge2,d_shi3,d_ge3,weekday=1;
+  13          
+  14          
+  15          
+  16          int year1=19,year2=99,month=12,day=29;
+  17          
+  18          
+  19          void DataShow()
+  20          {
+  21   1              //日期处理
+  22   1              DataDeal2(year1,year2,month,day);
+  23   1      
+  24   1              WriteAddress(0x00); // 写 Date 的显示地址 , 将在第 1 行第 1 列开始显示
+  25   1      
+  26   1              //年显示
+  27   1              WriteData(d_qian1);
+  28   1              WriteData(d_bai1);
+  29   1              WriteData(d_shi1);
+  30   1              WriteData(d_ge1);
+  31   1              
+  32   1              //显示横杠 -
+  33   1              WriteData(0x2D);
+  34   1      
+  35   1              //月显示
+  36   1              WriteData(d_shi2);
+  37   1              WriteData(d_ge2);
+  38   1      
+  39   1              //显示横杠 -
+  40   1              WriteData(0x2D);
+  41   1      
+  42   1              //日显示        
+  43   1              WriteData(d_shi3);
+  44   1              WriteData(d_ge3);
+  45   1      
+  46   1              //星期显示
+  47   1              WeekDayShow();
+  48   1      
+  49   1      }
+  50          
+  51          /*******************************************************************************
+  52          * 函 数 名       : DataDeal1
+  53          * 函数功能               : 日期处理函数，计算日期的当前的日期值
+  54          * 参数                   ：无
+C51 COMPILER V9.01   DATA                                                                  01/04/2021 22:20:20 PAGE 2   
+
+  55          *******************************************************************************/
+  56          void DataDeal1()
+  57          {
+  58   1      
+  59   1              if(day>=30)
+  60   1              {
+  61   2                      month++;
+  62   2                      day=1;
+  63   2      
+  64   2                      if(month>=13)
+  65   2                      {
+  66   3                              month = 1;
+  67   3                              year2++;
+  68   3                              if(year2>=100)
+  69   3                              {
+  70   4                                      year2 = 0;
+  71   4                                      year1++;
+  72   4                                      if(year1>=100)
+  73   4                                      {
+  74   5                                              year1=0;
+  75   5                                      }
+  76   4                              }
+  77   3                      }                       
+  78   2              }
+  79   1      }
+  80          
+  81           
+  82          /***********************************************************
+  83          *函数名         ：DataDeal2
+  84          *功能           ：数值处理，对要显示的数字处理成对应字符
+  85          *参数           ：year 年       month 月  day 日
+  86          ************************************************************/
+  87          void DataDeal2(int year1,int year2,int month,int day)
+  88          {       
+  89   1              d_qian1=year1/10+'0';
+  90   1              d_bai1=year1%10+'0';
+  91   1              d_shi1=year2/10+'0';
+  92   1              d_ge1=year2%10+'0';
+  93   1      
+  94   1              d_shi2=month/10+'0';
+  95   1              d_ge2=month%10+'0';
+  96   1      
+  97   1              d_shi3=day/10+'0';
+  98   1              d_ge3=day%10+'0';
+  99   1              BlinkDeal();            
+ 100   1      }
+ 101          
+ 102          /***********************************************************
+ 103          *函数名         ：WeekDayShow
+ 104          *功能           ：对应星期显示计算
+ 105          *参数           ：无
+ 106          ************************************************************/
+ 107          void WeekDayShow()
+ 108          {
+ 109   1              WriteAddress(0x0D);
+ 110   1              Delay1ms(50);
+ 111   1              switch(weekday)
+ 112   1              {
+ 113   2                      case 0: break;
+ 114   2                      case 1: WriteData(0x01);break;
+ 115   2                      case 2: WriteData(0x02);break;
+ 116   2                      case 3: WriteData(0x03);break;
+C51 COMPILER V9.01   DATA                                                                  01/04/2021 22:20:20 PAGE 3   
+
+ 117   2                      case 4: WriteData(0x04);break;
+ 118   2                      case 5: WriteData(0x05);break;
+ 119   2                      case 6: WriteData(0x06);break;
+ 120   2                      case 7: WriteData(0x07);break;
+ 121   2                      
+ 122   2              }
+ 123   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    389    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     17       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

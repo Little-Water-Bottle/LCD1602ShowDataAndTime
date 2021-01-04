@@ -1,0 +1,233 @@
+C51 COMPILER V9.01   TIMER                                                                 01/04/2021 22:20:20 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN Timer.obj
+COMPILER INVOKED BY: D:\App_program\Keil4\keil4\install_location\C51\BIN\C51.EXE HardWare\Timer.c BROWSE INCDIR(.\HardWa
+                    -re;..\LM016L显示时钟和日期) DEBUG OBJECTEXTEND PRINT(.\Timer.lst) OBJECT(Timer.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          #include "Timer.h"
+   4          #include "LM016L.h"
+   5          #include "Data.h"
+   6          #include "Button.h"
+   7          
+   8          //num1:秒初始值 num2:分初始值 num3:时初始值
+   9          int num1=55,num2=59,num3=23;
+  10          //char num11='0',num22='0',num33='0';
+  11          
+  12          //分离每个数字的个位和十位/
+  13          static char t_shi1,t_ge1,t_shi2,t_ge2,t_shi3,t_ge3;
+  14          
+  15          static int i=0; //给中断计数使用
+  16          
+  17          char blink_flag=0;      //定义时间闪烁标志      0 不闪，1闪烁
+  18                                                                                          
+  19          
+  20          void TimerShow()
+  21          {
+  22   1              //时间处理
+  23   1              NumDeal(num1,num2,num3);
+  24   1      
+  25   1              WriteAddress(0x40); // 写 Time 的显示地址 , 将在第 2 行第 1 列开始显示
+  26   1      
+  27   1              //时显示
+  28   1              WriteData(t_shi3);
+  29   1              WriteData(t_ge3);
+  30   1              
+  31   1              //显示横杠 -
+  32   1              WriteData(0x3A);
+  33   1      
+  34   1              //分显示
+  35   1              WriteData(t_shi2);
+  36   1              WriteData(t_ge2);
+  37   1      
+  38   1              //显示横杠 -
+  39   1              WriteData(0x3A);
+  40   1              //秒显示        
+  41   1              WriteData(t_shi1);
+  42   1              WriteData(t_ge1);
+  43   1      
+  44   1      //      //显示温度符号
+  45   1      //      WriteData(0x00);
+  46   1                                      
+  47   1      //      WriteInstruction(0x01);
+  48   1      
+  49   1      }
+  50          
+  51          /***********************************************************
+  52          *函数名         ：NumDeal
+  53          *功能           ：数值处理，对要显示的数字处理成对应字符
+  54          *参数           ：num1 秒       num2 分   num3 时
+C51 COMPILER V9.01   TIMER                                                                 01/04/2021 22:20:20 PAGE 2   
+
+  55          ************************************************************/
+  56          void NumDeal(char num1,char num2,char num3)
+  57          {
+  58   1      
+  59   1              t_shi1=num1/10+'0';
+  60   1              t_ge1=num1%10+'0';
+  61   1      
+  62   1              t_shi2=num2/10+'0';
+  63   1              t_ge2=num2%10+'0';
+  64   1      
+  65   1              t_shi3=num3/10+'0';
+  66   1              t_ge3=num3%10+'0';
+  67   1              BlinkDeal();
+  68   1                      
+  69   1      }
+  70          
+  71          /*******************************************************************************
+  72          * 函 数 名         : BlinkDeal
+  73          * 函数功能                 : 闪烁处理
+  74          * 参数                     ：无
+  75          *******************************************************************************/
+  76          void BlinkDeal()
+  77          {
+  78   1              switch(button_num1)
+  79   1              {
+  80   2                      case 0: break;
+  81   2                      case 1: 
+  82   2                      if(blink_flag ==1)  //被设置位灭0.25秒
+  83   2                      {
+  84   3                              if(button_num2 ==0)     //时间闪烁处理
+  85   3                              {
+  86   4                                      t_shi3=' ';
+  87   4                                      t_ge3=' ';
+  88   4                              }
+  89   3                              else    //日期闪烁处理
+  90   3                              {
+  91   4                                      d_qian1=' ';
+  92   4                                      d_bai1=' ';
+  93   4                                      d_shi1=' ';
+  94   4                                      d_ge1=' ';
+  95   4                              }
+  96   3                              
+  97   3                      } 
+  98   2                      break;  
+  99   2                      case 2: 
+ 100   2                      if(blink_flag == 1) 
+ 101   2                      {
+ 102   3                              if(button_num2 ==0)     //时间闪烁处理
+ 103   3                              {
+ 104   4                                      t_shi2=' ';
+ 105   4                                      t_ge2=' ';
+ 106   4                              }
+ 107   3                              else    //日期闪烁处理
+ 108   3                              {
+ 109   4                                      d_shi2=' ';
+ 110   4                                      d_ge2=' ';
+ 111   4                              }
+ 112   3                      } 
+ 113   2                      break;
+ 114   2                      case 3: 
+ 115   2                      if(blink_flag == 1)
+ 116   2                      {
+C51 COMPILER V9.01   TIMER                                                                 01/04/2021 22:20:20 PAGE 3   
+
+ 117   3                              if(button_num2 ==0)     //时间闪烁处理
+ 118   3                              {
+ 119   4                                      t_shi1=' ';
+ 120   4                                      t_ge1=' ';
+ 121   4                              }
+ 122   3                              else    //日期闪烁处理
+ 123   3                              {
+ 124   4                                      d_shi3=' ';
+ 125   4                                      d_ge3=' ';
+ 126   4                              }
+ 127   3                      }                
+ 128   2                      break;
+ 129   2                      default: break;
+ 130   2                              
+ 131   2              }
+ 132   1      }
+ 133          
+ 134          
+ 135          
+ 136          /*******************************************************************************
+ 137          * 函 数 名         : TimerInit
+ 138          * 函数功能                 : 定时器0初始化
+ 139          * 参数                     ：无
+ 140          *******************************************************************************/
+ 141          void TimerInit()
+ 142          {
+ 143   1              TMOD|=0X01;     //选择为定时器0模式，工作方式1，仅用TR0打开启动。
+ 144   1              TH0=0X4C;       //给定时器赋初值，定时50ms              3CB0
+ 145   1              TL0=0X00;       //0X3CB0的十进制是15536 从15536计数到65536计数50000次 即50000us=50ms    
+ 146   1              ET0=1;          //打开定时器0中断允许
+ 147   1              EA=1;           //打开总中断
+ 148   1              TR0=1;          //打开定时器    
+ 149   1      
+ 150   1      }
+ 151          
+ 152          /*******************************************************************************
+ 153          * 函 数 名         : Timer0()
+ 154          * 函数功能                 : 定时器0中断函数
+ 155          * 参数                     ：无
+ 156          *******************************************************************************/                
+ 157          void Timer0() interrupt 1
+ 158          {
+ 159   1               TH0=0x4C;
+ 160   1               TL0=0x00;
+ 161   1               i++;
+ 162   1      
+ 163   1              //使得setting_flag 0.2秒转换一次
+ 164   1              if(i%10<5)
+ 165   1              {
+ 166   2                      blink_flag = 0;
+ 167   2              }
+ 168   1              if(i%10>=5)
+ 169   1              {
+ 170   2                      blink_flag = 1;
+ 171   2              }
+ 172   1      
+ 173   1               if(i==20)//20个50毫秒即一秒
+ 174   1                      {
+ 175   2                              i=0;
+ 176   2                         if(button_num1==0)
+ 177   2                         {
+ 178   3                                 num1++;
+C51 COMPILER V9.01   TIMER                                                                 01/04/2021 22:20:20 PAGE 4   
+
+ 179   3                         }
+ 180   2                              if(num1==60)
+ 181   2                              {
+ 182   3                                      num1=0;
+ 183   3                                      num2++;
+ 184   3                                      if(num2==60)//定时一小时自动清零
+ 185   3                                      {
+ 186   4                                              num2=0;
+ 187   4                                              num3++;
+ 188   4                                              if(num3==24)
+ 189   4                                              {
+ 190   5                                                      num3=0;
+ 191   5                                                      day++;
+ 192   5                                                      weekday++;
+ 193   5                                                      if(weekday==8)
+ 194   5                                                      {
+ 195   6                                                              weekday=1;
+ 196   6                                                      }
+ 197   5                                                      //日期处理
+ 198   5                                                      DataDeal1();
+ 199   5                                              }
+ 200   4                                      }       
+ 201   3                              }
+ 202   2                      }               
+ 203   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    439    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
